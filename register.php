@@ -1,6 +1,4 @@
 <?php
-session_start();
-
 $file_path = 'users.json';
 
 function read_users() {
@@ -20,6 +18,10 @@ function write_users($users) {
 $users = read_users();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = $_POST['name'];
+    $address = $_POST['address'];
+    $dob = $_POST['dob'];
+    $college = $_POST['college'];
     $username = $_POST['username'];
     $password = $_POST['password'];
 
@@ -30,7 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    $users[] = ['username' => $username, 'password' => $password];
+    $users[] = [
+        'name' => $name,
+        'address' => $address,
+        'dob' => $dob,
+        'college' => $college,
+        'username' => $username,
+        'password' => $password
+    ];
     write_users($users);
 
     echo json_encode(['success' => true, 'users' => array_column($users, 'username')]);
