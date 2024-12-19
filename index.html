@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Form</title>
+    <title>Enhanced Registration Form</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
+            background-color: #e8f0fe;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -17,24 +17,29 @@
         .container {
             background-color: #fff;
             padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
         }
         h2 {
             margin-top: 0;
-            text-align: center;
+            color: #333;
         }
         .form-group {
             margin-bottom: 15px;
+            text-align: left;
         }
         .form-group label {
             display: block;
             margin-bottom: 5px;
+            color: #555;
         }
         .form-group input {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             box-sizing: border-box;
         }
         .form-group button {
@@ -45,6 +50,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-top: 10px;
         }
         .form-group button:hover {
             background-color: #0056b3;
@@ -57,12 +63,56 @@
         .error {
             color: red;
         }
+        .user-list {
+            display: none;
+            margin-top: 20px;
+        }
+        .user-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        .user-list li {
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        .show-users-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .show-users-btn:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Register</h2>
         <form id="registrationForm" action="register.php" method="POST">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" name="address" required>
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" name="dob" required>
+            </div>
+            <div class="form-group">
+                <label for="college">College Name</label>
+                <input type="text" id="college" name="college" required>
+            </div>
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
@@ -76,37 +126,28 @@
             </div>
             <div class="message"></div>
         </form>
-        <div class="form-group">
+        <button class="show-users-btn" onclick="toggleUserList()">Show Registered Users</button>
+        <div class="user-list" id="userList">
             <h3>Registered Users</h3>
-            <ul id="userList"></ul>
+            <ul></ul>
         </div>
     </div>
 
     <script>
         document.getElementById('registrationForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if(username === '' || password === '') {
-                document.querySelector('.message').textContent = 'All fields are required';
-                document.querySelector('.message').classList.add('error');
-                return;
-            }
+            const formData = new FormData(event.target);
 
             fetch('register.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: `username=${username}&password=${password}`
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
-                if(data.success) {
+                if (data.success) {
                     document.querySelector('.message').textContent = 'Registration successful!';
                     document.querySelector('.message').classList.remove('error');
-                    document.getElementById('userList').innerHTML = data.users.map(user => `<li>${user}</li>`).join('');
+                    updateUserList(data.users);
                 } else {
                     document.querySelector('.message').textContent = data.message;
                     document.querySelector('.message').classList.add('error');
@@ -114,11 +155,30 @@
             });
         });
 
+        function toggleUserList() {
+            const userList = document.getElementById('userList');
+            if (userList.style.display === 'none' || userList.style.display === '') {
+                fetch('register.php')
+                .then(response => response.json())
+                .then(data => {
+                    updateUserList(data.users);
+                    userList.style.display = 'block';
+                });
+            } else {
+                userList.style.display = 'none';
+            }
+        }
+
+        function updateUserList(users) {
+            const userList = document.getElementById('userList').querySelector('ul');
+            userList.innerHTML = users.map(user => `<li>${user}</li>`).join('');
+        }
+
         window.onload = function() {
             fetch('register.php')
             .then(response => response.json())
             .then(data => {
-                document.getElementById('userList').innerHTML = data.users.map(user => `<li>${user}</li>`).join('');
+                updateUserList(data.users);
             });
         };
     </script>
